@@ -1,24 +1,36 @@
-// src/model/Pedido.java
 package model;
 
 import java.sql.Date; // IMPORTANTE: Usar java.sql.Date para compatibilidade com JDBC
 
 public class Pedido {
     private int id_pedido;
-    private int id_cliente; 
+    private int id_cliente;    
     private int id_funcionario;
     private Date data_recebimento;
     private Date data_entrega_prevista;
     private Date data_entrega_real; // Pode ser null
-    private String status; 
+    private String status;    
 
-    // Construtor para NOVO pedido
+    // 1. Construtor para NOVO pedido (INSERT no banco)
+    // Inicializa o status como "Recebido" por padrão.
     public Pedido(int id_cliente, int id_funcionario, Date data_recebimento, Date data_entrega_prevista) {
         this.id_cliente = id_cliente;
         this.id_funcionario = id_funcionario;
         this.data_recebimento = data_recebimento;
         this.data_entrega_prevista = data_entrega_prevista;
         this.status = "Recebido";
+        this.data_entrega_real = null; // Garante que é nulo ao criar
+    }
+
+    // 2. Construtor para LER DO BANCO (SELECT) - Contém ID e todos os campos
+    public Pedido(int id_pedido, int id_cliente, int id_funcionario, Date data_recebimento, Date data_entrega_prevista, Date data_entrega_real, String status) {
+        this.id_pedido = id_pedido; // ID lido do banco
+        this.id_cliente = id_cliente;
+        this.id_funcionario = id_funcionario;
+        this.data_recebimento = data_recebimento;
+        this.data_entrega_prevista = data_entrega_prevista;
+        this.data_entrega_real = data_entrega_real; // Pode ser nulo se o banco retornar NULL
+        this.status = status; // Status lido do banco
     }
 
     // Getters e Setters
@@ -40,8 +52,8 @@ public class Pedido {
     @Override
     public String toString() {
         return "Pedido [ID=" + id_pedido + ", Cliente ID=" + id_cliente + ", Func. ID=" + id_funcionario + 
-               ", Recebido=" + data_recebimento + ", Entrega Prevista=" + data_entrega_prevista + 
-               ", Entrega Real=" + (data_entrega_real != null ? data_entrega_real : "PENDENTE") + 
-               ", Status=" + status + "]";
+                ", Recebido=" + data_recebimento + ", Entrega Prevista=" + data_entrega_prevista + 
+                ", Entrega Real=" + (data_entrega_real != null ? data_entrega_real : "PENDENTE") + 
+                ", Status=" + status + "]";
     }
 }

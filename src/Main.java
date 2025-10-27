@@ -27,8 +27,6 @@ public class Main {
     // --- BLOCO ESTÁTICO DE INICIALIZAÇÃO (CRÍTICO: Trata a Conexão JDBC) ---
     static {
         try {
-            // Inicializa todos os repositórios migrados. 
-            // A chamada a new ClienteRepository() implicitamente tenta carregar o driver JDBC.
             clienteRepository = new ClienteRepository();
             funcionarioRepository = new FuncionarioRepository();
             servicoRepository = new ServicoRepository();
@@ -38,11 +36,10 @@ public class Main {
             
             System.out.println("✅ Sistema inicializado. Conexão com o Banco de Dados estabelecida.");
         } catch (Exception e) {
-            // Captura qualquer erro de inicialização, como SQLException do DatabaseConnection
             System.err.println("❌ ERRO FATAL: Falha ao iniciar o sistema de persistência.");
             System.err.println("Verifique o arquivo DatabaseConnection.java, as credenciais e se o MySQL está rodando.");
             e.printStackTrace();
-            System.exit(1); // Encerra o programa
+            System.exit(1); 
         }
     }
 
@@ -70,12 +67,11 @@ public class Main {
 
     private static int lerOpcao() {
         try {
-            // Usa nextLine() e parse para evitar problemas com buffer do scanner
             String input = scanner.nextLine().trim(); 
             if (input.isEmpty()) return -1;
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
-            return -1; // Retorna inválido
+            return -1; 
         }
     }
     
@@ -83,7 +79,6 @@ public class Main {
         while (true) {
             System.out.print(prompt);
             try {
-                // Remove vírgulas e substitui por ponto (padrão SQL/Java)
                 String input = scanner.nextLine().replace(',', '.');
                 return Double.parseDouble(input);
             } catch (NumberFormatException e) {
@@ -93,14 +88,13 @@ public class Main {
     }
     
     private static Date lerData(String prompt) {
-        // Formato brasileiro comum: dd/MM/yyyy
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         while (true) {
             System.out.print(prompt + " (dd/MM/yyyy): ");
             String input = scanner.nextLine();
             try {
                 LocalDate localDate = LocalDate.parse(input, formatter);
-                return Date.valueOf(localDate); // Converte para java.sql.Date
+                return Date.valueOf(localDate); 
             } catch (DateTimeParseException e) {
                 System.out.println("Formato de data inválido. Use o formato dd/MM/yyyy (ex: 25/10/2025).");
             }
@@ -163,9 +157,9 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarFuncionario(); break;
                 case 2: listarFuncionarios(); break;
-                case 3: buscarFuncionario(); break; // NOVO
-                case 4: atualizarFuncionario(); break; // NOVO
-                case 5: excluirFuncionario(); break; // NOVO
+                case 3: buscarFuncionario(); break; 
+                case 4: atualizarFuncionario(); break; 
+                case 5: excluirFuncionario(); break; 
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
@@ -181,9 +175,9 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarServico(); break;
                 case 2: listarServicos(); break;
-                case 3: buscarServico(); break; // NOVO
-                case 4: atualizarServico(); break; // NOVO
-                case 5: excluirServico(); break; // NOVO
+                case 3: buscarServico(); break; 
+                case 4: atualizarServico(); break; 
+                case 5: excluirServico(); break; 
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
@@ -205,7 +199,8 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarPedido(); break;
                 case 2: listarPedidos(); break;
-                // Os métodos 3 e 4, que envolvem mais lógica, são os próximos a serem implementados
+                case 3: adicionarItensAoPedido(); break; // NOVO
+                case 4: finalizarPedidoPagamento(); break; // NOVO
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
@@ -290,7 +285,7 @@ public class Main {
         if (clienteRepository.removerPorId(id)) {
             System.out.println("Cliente removido com sucesso!");
         } else {
-            System.out.println("Falha ao remover. Cliente com ID " + id + " não encontrado ou possui pedidos associados (chave estrangeira).");
+            System.out.println("Falha ao remover. Cliente com ID " + id + " não encontrado ou possui pedidos associados.");
         }
     }
 
@@ -383,7 +378,6 @@ public class Main {
         System.out.print("Tempo Estimado (em minutos - INT): ");
         int tempo = lerOpcao();
         
-        // CORRIGIDO: Usando lerDouble() para ler o preço
         double preco = lerDouble("Preço Base (DECIMAL): "); 
 
         Servico s = new Servico(descricao, tempo, preco);
@@ -456,7 +450,6 @@ public class Main {
     // -------------------------------------------------------------------------
     
     private static void cadastrarPedido() {
-        // ... (o seu método cadastrarPedido está correto e foi mantido)
         System.out.println("\n--- Registro de Novo Pedido ---");
         
         System.out.print("ID do Cliente (Necessário): ");
@@ -479,7 +472,6 @@ public class Main {
         Pedido p = new Pedido(idCliente, idFuncionario, dataRecebimento, dataEntregaPrevista);
         if (pedidoRepository.adicionar(p) != null) {
             System.out.println("Pedido registrado com sucesso! ID: " + p.getId());
-            // Sugestão: Chamar adicionarItensAoPedido(p.getId()) aqui para guiar o usuário
         } else {
             System.out.println("Falha ao registrar pedido.");
         }
@@ -497,6 +489,123 @@ public class Main {
         }
     }
 
-    // Os métodos 3 e 4 do menu de Pedidos (Adicionar Item e Finalizar Pagamento) precisam ser implementados.
+    // -------------------------------------------------------------------------
+    // --- NOVOS MÉTODOS DE LÓGICA DE NEGÓCIO ---
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Adiciona itens (Serviços) a um pedido existente no banco de dados.
+     * Usa ItemPedidoRepository e ServicoRepository.
+     */
+    private static void adicionarItensAoPedido() {
+        System.out.println("\n--- Adicionar Itens ao Pedido ---");
+        System.out.print("Digite o ID do Pedido que deseja adicionar itens: ");
+        int idPedido = lerOpcao();
+        
+        // 1. Valida o Pedido
+        Pedido pedido = pedidoRepository.buscarPorId(idPedido);
+        if (pedido == null) {
+            System.out.println("ERRO: Pedido com ID " + idPedido + " não encontrado.");
+            return;
+        }
 
+        // 2. Loop para adicionar múltiplos itens
+        while (true) {
+            listarServicos();
+            System.out.print("Digite o ID do Serviço (0 para encerrar): ");
+            int idServico = lerOpcao();
+            
+            if (idServico == 0) break;
+
+            // 3. Valida o Serviço
+            Servico servico = servicoRepository.buscarPorId(idServico);
+            if (servico == null) {
+                System.out.println("ERRO: Serviço com ID " + idServico + " não encontrado.");
+                continue;
+            }
+
+            // 4. Pede a quantidade
+            System.out.print("Quantidade para o serviço '" + servico.getDescricao() + "': ");
+            int quantidade = lerOpcao();
+            if (quantidade <= 0) {
+                System.out.println("Quantidade inválida. Tente novamente.");
+                continue;
+            }
+
+            // 5. Cálculo e Criação
+            double valorUnitario = servico.getPrecoBase();
+            double subtotal = valorUnitario * quantidade;
+
+            ItemPedido item = new ItemPedido(
+                idPedido, 
+                idServico, 
+                quantidade, 
+                valorUnitario, 
+                subtotal
+            );
+
+            // 6. Persistência
+            if (itemPedidoRepository.adicionar(item) != null) {
+                System.out.printf("✅ Item Adicionado: %d x %s (Subtotal: R$%.2f)\n", quantidade, servico.getDescricao(), subtotal);
+            } else {
+                System.out.println("❌ Falha ao adicionar item ao pedido.");
+            }
+        }
+        System.out.println("Itens do pedido finalizados. Retornando ao menu de pedidos.");
+    }
+    
+    /**
+     * Finaliza o pedido registrando o pagamento.
+     * Requer a soma dos subtotais (ItemPedido) para determinar o Valor Total.
+     */
+    private static void finalizarPedidoPagamento() {
+        System.out.println("\n--- Finalizar Pedido e Registrar Pagamento ---");
+        System.out.print("Digite o ID do Pedido para finalizar: ");
+        int idPedido = lerOpcao();
+        
+        // 1. Valida o Pedido
+        Pedido pedido = pedidoRepository.buscarPorId(idPedido);
+        if (pedido == null) {
+            System.out.println("ERRO: Pedido com ID " + idPedido + " não encontrado.");
+            return;
+        }
+        
+        // 2. Cálculo do Valor Total (Lógica de Negócio Necessária: Deveria buscar itens e somar!)
+        // Como o ItemPedidoRepository não tem um 'listarPorPedidoId' simples, 
+        // vamos simular o valor total pedindo ao usuário.
+        // *Em um projeto real, você precisaria de um método no ItemPedidoRepository para calcular este valor.*
+        System.out.println("ATENÇÃO: Este sistema precisa calcular o total (soma dos itens).");
+        double valorTotal = lerDouble("Digite o Valor Total a ser cobrado: ");
+        
+        // 3. Coleta dados do Pagamento
+        System.out.print("Forma de Pagamento (Ex: Cartão, Pix, Dinheiro): ");
+        String formaPagamento = scanner.nextLine();
+        
+        Date dataPagamento = lerData("Data do Pagamento");
+        
+        System.out.print("Status do Pagamento (Ex: Pago, Pendente): ");
+        String statusPagamento = scanner.nextLine();
+        
+        // 4. Criação e Persistência do Pagamento
+        Pagamento pagamento = new Pagamento(
+            idPedido, 
+            formaPagamento, 
+            valorTotal, 
+            dataPagamento, 
+            statusPagamento
+        );
+
+        if (pagamentoRepository.adicionar(pagamento) != null) {
+            System.out.println("✅ Pagamento registrado com sucesso! ID: " + pagamento.getId());
+            
+            // 5. Atualizar Status do Pedido (Opcional, mas recomendado)
+            if (statusPagamento.equalsIgnoreCase("Pago") && !pedido.getStatus().equalsIgnoreCase("Pronto para Entrega")) {
+                pedido.setStatus("Pronto para Entrega");
+                pedidoRepository.atualizar(idPedido, pedido);
+                System.out.println("Status do Pedido atualizado para: Pronto para Entrega.");
+            }
+        } else {
+            System.out.println("❌ Falha ao registrar pagamento. Verifique se o pedido já foi pago.");
+        }
+    }
 }

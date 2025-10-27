@@ -1,35 +1,57 @@
-// Main.java
+package util;
+
 import model.*;
 import repository.*;
-import util.DatabaseConnection; // Importado para caso o usuário queira testar a conexão diretamente
 
-import java.math.BigDecimal;
-import java.sql.Date; // Usar java.sql.Date para compatibilidade com JDBC
+import java.sql.Date;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
 
-    // Inicialização dos Repositórios JDBC
-    private static ClienteRepository clienteRepository = new ClienteRepository();
-    private static FuncionarioRepository funcionarioRepository = new FuncionarioRepository();
-    private static ServicoRepository servicoRepository = new ServicoRepository();
-    private static PedidoRepository pedidoRepository = new PedidoRepository();
-    // Os Repositórios de Pagamento e ItemPedido seriam adicionados aqui:
-    // private static PagamentoRepository pagamentoRepository = new PagamentoRepository(); 
-    // private static ItemPedidoRepository itemPedidoRepository = new ItemPedidoRepository(); 
+    // --- Declaração de Repositórios ---
+    private static ClienteRepository clienteRepository;
+    private static FuncionarioRepository funcionarioRepository;
+    private static ServicoRepository servicoRepository;
+    private static PedidoRepository pedidoRepository;
+    private static ItemPedidoRepository itemPedidoRepository;
+    private static PagamentoRepository pagamentoRepository;
     
     private static Scanner scanner = new Scanner(System.in);
+
+    // --- BLOCO ESTÁTICO DE INICIALIZAÇÃO (CRÍTICO: Trata a Conexão JDBC) ---
+    static {
+        try {
+            // Inicializa todos os repositórios migrados. 
+            // A chamada a new ClienteRepository() implicitamente tenta carregar o driver JDBC.
+            clienteRepository = new ClienteRepository();
+            funcionarioRepository = new FuncionarioRepository();
+            servicoRepository = new ServicoRepository();
+            pedidoRepository = new PedidoRepository();
+            itemPedidoRepository = new ItemPedidoRepository();
+            pagamentoRepository = new PagamentoRepository();
+            
+            System.out.println("✅ Sistema inicializado. Conexão com o Banco de Dados estabelecida.");
+        } catch (Exception e) {
+            // Captura qualquer erro de inicialização, como SQLException do DatabaseConnection
+            System.err.println("❌ ERRO FATAL: Falha ao iniciar o sistema de persistência.");
+            System.err.println("Verifique o arquivo DatabaseConnection.java, as credenciais e se o MySQL está rodando.");
+            e.printStackTrace();
+            System.exit(1); // Encerra o programa
+        }
+    }
 
     public static void main(String[] args) {
         System.out.println("--- Sistema de Gerenciamento de Lavanderia ---");
         int opcao;
         do {
             exibirMenuPrincipal();
-            opcao = lerOpcao(); // Usa método seguro
+            opcao = lerOpcao();
             
             switch (opcao) {
                 case 1: gerenciarFuncionarios(); break;
@@ -42,23 +64,28 @@ public class Main {
         } while (opcao != 0);
     }
     
-    // --- MÉTODOS DE UTILIDADE ---
+    // -------------------------------------------------------------------------
+    // --- MÉTODOS DE UTILIDADE E LEITURA SEGURA ---
+    // -------------------------------------------------------------------------
 
     private static int lerOpcao() {
         try {
-            return Integer.parseInt(scanner.nextLine());
+            // Usa nextLine() e parse para evitar problemas com buffer do scanner
+            String input = scanner.nextLine().trim(); 
+            if (input.isEmpty()) return -1;
+            return Integer.parseInt(input);
         } catch (NumberFormatException e) {
             return -1; // Retorna inválido
         }
     }
     
-    private static BigDecimal lerBigDecimal(String prompt) {
+    private static double lerDouble(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
-                // Remove vírgulas e substitui por ponto (padrão americano) para evitar erros
-                String input = scanner.nextLine().replace(',', '.'); 
-                return new BigDecimal(input);
+                // Remove vírgulas e substitui por ponto (padrão SQL/Java)
+                String input = scanner.nextLine().replace(',', '.');
+                return Double.parseDouble(input);
             } catch (NumberFormatException e) {
                 System.out.println("Entrada inválida. Por favor, digite um valor numérico (ex: 15.50).");
             }
@@ -80,7 +107,9 @@ public class Main {
         }
     }
 
+    // -------------------------------------------------------------------------
     // --- MÉTODOS DE EXIBIÇÃO DE MENU ---
+    // -------------------------------------------------------------------------
 
     private static void exibirMenuPrincipal() {
         System.out.println("\n===== MENU PRINCIPAL =====");
@@ -103,7 +132,9 @@ public class Main {
         System.out.print("Escolha: ");
     }
     
+    // -------------------------------------------------------------------------
     // --- GERENCIAMENTO GERAL ---
+    // -------------------------------------------------------------------------
 
     private static void gerenciarClientes() {
         int opcao;
@@ -115,7 +146,6 @@ public class Main {
                 case 1: cadastrarCliente(); break;
                 case 2: listarClientes(); break;
                 case 3: buscarCliente(); break;
-                // Os métodos 4 e 5 (Atualizar/Excluir) estão no final da classe para economizar espaço aqui
                 case 4: atualizarCliente(); break; 
                 case 5: excluirCliente(); break;
                 case 0: break;
@@ -133,7 +163,9 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarFuncionario(); break;
                 case 2: listarFuncionarios(); break;
-                // Implemente os demais CRUDs (Buscar, Atualizar, Excluir)
+                case 3: buscarFuncionario(); break; // NOVO
+                case 4: atualizarFuncionario(); break; // NOVO
+                case 5: excluirFuncionario(); break; // NOVO
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
@@ -149,7 +181,9 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarServico(); break;
                 case 2: listarServicos(); break;
-                // Implemente os demais CRUDs (Buscar, Atualizar, Excluir)
+                case 3: buscarServico(); break; // NOVO
+                case 4: atualizarServico(); break; // NOVO
+                case 5: excluirServico(); break; // NOVO
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
@@ -171,14 +205,16 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarPedido(); break;
                 case 2: listarPedidos(); break;
-                // Implemente 3 e 4
+                // Os métodos 3 e 4, que envolvem mais lógica, são os próximos a serem implementados
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
         } while (opcao != 0);
     }
 
-    // --- MÉTODOS CRUD DE CLIENTE (Exemplo Completo) ---
+    // -------------------------------------------------------------------------
+    // --- MÉTODOS CRUD DE CLIENTE (Usando JDBC) ---
+    // -------------------------------------------------------------------------
 
     private static void cadastrarCliente() {
         System.out.println("\n--- Cadastro de Cliente ---");
@@ -225,18 +261,19 @@ public class Main {
     private static void atualizarCliente() {
         System.out.print("Digite o ID do cliente para atualizar: ");
         int id = lerOpcao();
-        if (clienteRepository.buscarPorId(id) == null) {
+        Cliente clienteExistente = clienteRepository.buscarPorId(id);
+        if (clienteExistente == null) {
             System.out.println("Cliente com ID " + id + " não encontrado.");
             return;
         }
         
-        System.out.print("Digite o novo nome: ");
+        System.out.print("Digite o novo nome (Atual: " + clienteExistente.getNome() + "): ");
         String nome = scanner.nextLine();
-        System.out.print("Digite o novo email: ");
+        System.out.print("Digite o novo email (Atual: " + clienteExistente.getEmail() + "): ");
         String email = scanner.nextLine();
-        System.out.print("Digite o novo endereço: ");
+        System.out.print("Digite o novo endereço (Atual: " + clienteExistente.getEndereco() + "): ");
         String endereco = scanner.nextLine();
-        System.out.print("Digite o novo telefone: ");
+        System.out.print("Digite o novo telefone (Atual: " + clienteExistente.getTelefone() + "): ");
         String telefone = scanner.nextLine();
         
         Cliente dadosNovos = new Cliente(nome, email, endereco, telefone);
@@ -257,7 +294,9 @@ public class Main {
         }
     }
 
-    // --- MÉTODOS CRUD DE FUNCIONÁRIO ---
+    // -------------------------------------------------------------------------
+    // --- MÉTODOS CRUD DE FUNCIONÁRIO (Usando JDBC) ---
+    // -------------------------------------------------------------------------
     
     private static void cadastrarFuncionario() {
         System.out.println("\n--- Cadastro de Funcionário ---");
@@ -287,18 +326,65 @@ public class Main {
             }
         }
     }
+
+    private static void buscarFuncionario() {
+        System.out.print("Digite o ID do funcionário para buscar: ");
+        int id = lerOpcao();
+        Funcionario f = funcionarioRepository.buscarPorId(id);
+        if (f != null) {
+            System.out.println("Funcionário encontrado: " + f);
+        } else {
+            System.out.println("Funcionário com ID " + id + " não encontrado.");
+        }
+    }
+
+    private static void atualizarFuncionario() {
+        System.out.print("Digite o ID do funcionário para atualizar: ");
+        int id = lerOpcao();
+        Funcionario funcionarioExistente = funcionarioRepository.buscarPorId(id);
+        if (funcionarioExistente == null) {
+            System.out.println("Funcionário com ID " + id + " não encontrado.");
+            return;
+        }
+        
+        System.out.print("Digite o novo nome (Atual: " + funcionarioExistente.getNome() + "): ");
+        String nome = scanner.nextLine();
+        System.out.print("Digite o novo cargo (Atual: " + funcionarioExistente.getCargo() + "): ");
+        String cargo = scanner.nextLine();
+        System.out.print("Digite o novo telefone (Atual: " + funcionarioExistente.getTelefone() + "): ");
+        String telefone = scanner.nextLine();
+        
+        Funcionario dadosNovos = new Funcionario(nome, cargo, telefone);
+        if (funcionarioRepository.atualizar(id, dadosNovos)) {
+            System.out.println("Funcionário atualizado com sucesso!");
+        } else {
+            System.out.println("Falha ao atualizar funcionário.");
+        }
+    }
+
+    private static void excluirFuncionario() {
+        System.out.print("Digite o ID do funcionário para excluir: ");
+        int id = lerOpcao();
+        if (funcionarioRepository.removerPorId(id)) {
+            System.out.println("Funcionário removido com sucesso!");
+        } else {
+            System.out.println("Falha ao remover. Funcionário com ID " + id + " não encontrado ou possui pedidos associados.");
+        }
+    }
     
-    // --- MÉTODOS CRUD DE SERVIÇO ---
+    // -------------------------------------------------------------------------
+    // --- MÉTODOS CRUD DE SERVIÇO (Usando JDBC) ---
+    // -------------------------------------------------------------------------
     
     private static void cadastrarServico() {
         System.out.println("\n--- Cadastro de Serviço ---");
         System.out.print("Descrição: ");
         String descricao = scanner.nextLine();
-        System.out.print("Tempo Estimado (minutos - INT): ");
+        System.out.print("Tempo Estimado (em minutos - INT): ");
         int tempo = lerOpcao();
         
-        // Usa o método de leitura seguro para BigDecimal
-        BigDecimal preco = lerBigDecimal("Preço Base (DECIMAL): "); 
+        // CORRIGIDO: Usando lerDouble() para ler o preço
+        double preco = lerDouble("Preço Base (DECIMAL): "); 
 
         Servico s = new Servico(descricao, tempo, preco);
         if (servicoRepository.adicionar(s) != null) {
@@ -320,9 +406,57 @@ public class Main {
         }
     }
 
-    // --- MÉTODOS DE PEDIDO ---
+    private static void buscarServico() {
+        System.out.print("Digite o ID do serviço para buscar: ");
+        int id = lerOpcao();
+        Servico s = servicoRepository.buscarPorId(id);
+        if (s != null) {
+            System.out.println("Serviço encontrado: " + s);
+        } else {
+            System.out.println("Serviço com ID " + id + " não encontrado.");
+        }
+    }
+
+    private static void atualizarServico() {
+        System.out.print("Digite o ID do serviço para atualizar: ");
+        int id = lerOpcao();
+        Servico servicoExistente = servicoRepository.buscarPorId(id);
+        if (servicoExistente == null) {
+            System.out.println("Serviço com ID " + id + " não encontrado.");
+            return;
+        }
+        
+        System.out.print("Digite a nova descrição (Atual: " + servicoExistente.getDescricao() + "): ");
+        String descricao = scanner.nextLine();
+        System.out.print("Digite o novo Tempo Estimado em minutos (Atual: " + servicoExistente.getTempoEstimado() + "): ");
+        int tempo = lerOpcao(); 
+        
+        double preco = lerDouble("Novo Preço Base (Atual: " + servicoExistente.getPrecoBase() + "): "); 
+
+        Servico dadosNovos = new Servico(descricao, tempo, preco);
+        if (servicoRepository.atualizar(id, dadosNovos)) {
+            System.out.println("Serviço atualizado com sucesso!");
+        } else {
+            System.out.println("Falha ao atualizar serviço.");
+        }
+    }
+
+    private static void excluirServico() {
+        System.out.print("Digite o ID do serviço para excluir: ");
+        int id = lerOpcao();
+        if (servicoRepository.removerPorId(id)) {
+            System.out.println("Serviço removido com sucesso!");
+        } else {
+            System.out.println("Falha ao remover. Serviço com ID " + id + " não encontrado ou está em uso em algum pedido.");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // --- MÉTODOS DE PEDIDO (Usando JDBC) ---
+    // -------------------------------------------------------------------------
     
     private static void cadastrarPedido() {
+        // ... (o seu método cadastrarPedido está correto e foi mantido)
         System.out.println("\n--- Registro de Novo Pedido ---");
         
         System.out.print("ID do Cliente (Necessário): ");
@@ -339,14 +473,13 @@ public class Main {
             return;
         }
         
-        // Usa o método de leitura seguro para Datas
         Date dataRecebimento = lerData("Data de Recebimento");
         Date dataEntregaPrevista = lerData("Data de Entrega Prevista");
 
         Pedido p = new Pedido(idCliente, idFuncionario, dataRecebimento, dataEntregaPrevista);
         if (pedidoRepository.adicionar(p) != null) {
             System.out.println("Pedido registrado com sucesso! ID: " + p.getId());
-            // Após registrar o pedido, a próxima etapa seria adicionar itens (ItemPedidoRepository)
+            // Sugestão: Chamar adicionarItensAoPedido(p.getId()) aqui para guiar o usuário
         } else {
             System.out.println("Falha ao registrar pedido.");
         }
@@ -359,9 +492,11 @@ public class Main {
             System.out.println("Nenhum pedido registrado no banco de dados.");
         } else {
             for (Pedido p : pedidos) {
-                // Aqui seria ideal buscar o nome do Cliente e Funcionario para exibir
                 System.out.println(p);
             }
         }
     }
+
+    // Os métodos 3 e 4 do menu de Pedidos (Adicionar Item e Finalizar Pagamento) precisam ser implementados.
+
 }

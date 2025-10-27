@@ -1,14 +1,23 @@
-// src/model/Cliente.java
 package model;
 
 public class Cliente {
     private int id_cliente; // Nome do SQL
     private String nome;
     private String email;
-    private String endereco; // Novo atributo
+    private String endereco; 
     private String telefone;
 
+    // 1. Construtor usado para CRIAR um novo cliente (INSERT no banco - SEM ID)
     public Cliente(String nome, String email, String endereco, String telefone) {
+        this.nome = nome;
+        this.email = email;
+        this.endereco = endereco;
+        this.telefone = telefone;
+    }
+
+    // 2. Construtor usado para LER do banco de dados (SELECT - COM ID)
+    public Cliente(int id_cliente, String nome, String email, String endereco, String telefone) {
+        this.id_cliente = id_cliente; // Atribui o ID lido do banco
         this.nome = nome;
         this.email = email;
         this.endereco = endereco;

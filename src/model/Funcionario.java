@@ -1,24 +1,24 @@
 package model;
 
 public class Funcionario {
-    private int id_funcionario; // ID do banco
+    private int id_funcionario;
     private String nome;
-    private double salario;
-    private String matricula;
+    private String cargo;      // Sincronizado com SQL
+    private String telefone;   // Sincronizado com SQL
 
-    // 1. Construtor para CRIAR um novo funcionário (INSERT no banco - SEM ID)
-    public Funcionario(String nome, double salario, String matricula) {
+    // 1. Construtor para CRIAR (INSERT - SEM ID)
+    public Funcionario(String nome, String cargo, String telefone) { 
         this.nome = nome;
-        this.salario = salario;
-        this.matricula = matricula;
+        this.cargo = cargo;
+        this.telefone = telefone;
     }
 
-    // 2. Construtor para LER do banco de dados (SELECT - COM ID)
-    public Funcionario(int id_funcionario, String nome, double salario, String matricula) {
-        this.id_funcionario = id_funcionario; // Atribui o ID lido do banco
+    // 2. Construtor para LER (SELECT - COM ID)
+    public Funcionario(int id_funcionario, String nome, String cargo, String telefone) { 
+        this.id_funcionario = id_funcionario;
         this.nome = nome;
-        this.salario = salario;
-        this.matricula = matricula;
+        this.cargo = cargo;
+        this.telefone = telefone;
     }
 
     // Getters e Setters
@@ -26,13 +26,13 @@ public class Funcionario {
     public void setId(int id) { this.id_funcionario = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public double getSalario() { return salario; }
-    public void setSalario(double salario) { this.salario = salario; }
-    public String getMatricula() { return matricula; }
-    public void setMatricula(String matricula) { this.matricula = matricula; }
+    public String getCargo() { return cargo; }
+    public void setCargo(String cargo) { this.cargo = cargo; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
     @Override
     public String toString() {
-        return "Funcionario [ID=" + id_funcionario + ", Nome='" + nome + "', Salario=" + salario + ", Matrícula='" + matricula + "']";
+        return "Funcionario [ID=" + id_funcionario + ", Nome='" + nome + "', Cargo=" + cargo + ", Telefone='" + telefone + "']";
     }
 }

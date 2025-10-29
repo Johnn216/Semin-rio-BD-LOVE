@@ -2,7 +2,6 @@ package util;
 
 import model.*;
 import repository.*;
-
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -61,9 +60,7 @@ public class Main {
         } while (opcao != 0);
     }
     
-    // -------------------------------------------------------------------------
     // --- MÉTODOS DE UTILIDADE E LEITURA SEGURA ---
-    // -------------------------------------------------------------------------
 
     private static int lerOpcao() {
         try {
@@ -101,9 +98,7 @@ public class Main {
         }
     }
 
-    // -------------------------------------------------------------------------
     // --- MÉTODOS DE EXIBIÇÃO DE MENU ---
-    // -------------------------------------------------------------------------
 
     private static void exibirMenuPrincipal() {
         System.out.println("\n===== MENU PRINCIPAL =====");
@@ -126,9 +121,7 @@ public class Main {
         System.out.print("Escolha: ");
     }
     
-    // -------------------------------------------------------------------------
     // --- GERENCIAMENTO GERAL ---
-    // -------------------------------------------------------------------------
 
     private static void gerenciarClientes() {
         int opcao;
@@ -199,17 +192,15 @@ public class Main {
             switch (opcao) {
                 case 1: cadastrarPedido(); break;
                 case 2: listarPedidos(); break;
-                case 3: adicionarItensAoPedido(); break; // NOVO
-                case 4: finalizarPedidoPagamento(); break; // NOVO
+                case 3: adicionarItensAoPedido(); break; 
+                case 4: finalizarPedidoPagamento(); break; 
                 case 0: break;
                 default: System.out.println("Opção inválida.");
             }
         } while (opcao != 0);
     }
 
-    // -------------------------------------------------------------------------
     // --- MÉTODOS CRUD DE CLIENTE (Usando JDBC) ---
-    // -------------------------------------------------------------------------
 
     private static void cadastrarCliente() {
         System.out.println("\n--- Cadastro de Cliente ---");
@@ -244,8 +235,8 @@ public class Main {
     
     private static void buscarCliente() {
         System.out.print("Digite o ID do cliente para buscar: ");
-        int id = lerOpcao();
-        Cliente c = clienteRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Cliente c = clienteRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (c != null) {
             System.out.println("Cliente encontrado: " + c);
         } else {
@@ -255,24 +246,24 @@ public class Main {
 
     private static void atualizarCliente() {
         System.out.print("Digite o ID do cliente para atualizar: ");
-        int id = lerOpcao();
-        Cliente clienteExistente = clienteRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Cliente clienteExistente = clienteRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (clienteExistente == null) {
             System.out.println("Cliente com ID " + id + " não encontrado.");
             return;
         }
         
-        System.out.print("Digite o novo nome (Atual: " + clienteExistente.getNome() + "): ");
+        System.out.print("Digite o novo nome: ");
         String nome = scanner.nextLine();
-        System.out.print("Digite o novo email (Atual: " + clienteExistente.getEmail() + "): ");
+        System.out.print("Digite o novo email: ");
         String email = scanner.nextLine();
-        System.out.print("Digite o novo endereço (Atual: " + clienteExistente.getEndereco() + "): ");
+        System.out.print("Digite o novo endereço: ");
         String endereco = scanner.nextLine();
-        System.out.print("Digite o novo telefone (Atual: " + clienteExistente.getTelefone() + "): ");
+        System.out.print("Digite o novo telefone: ");
         String telefone = scanner.nextLine();
         
         Cliente dadosNovos = new Cliente(nome, email, endereco, telefone);
-        if (clienteRepository.atualizar(id, dadosNovos)) {
+        if (clienteRepository.atualizar(id, dadosNovos)) { // CORRIGIDO: Passa o ID e o objeto
             System.out.println("Cliente atualizado com sucesso!");
         } else {
             System.out.println("Falha ao atualizar cliente.");
@@ -281,17 +272,15 @@ public class Main {
     
     private static void excluirCliente() {
         System.out.print("Digite o ID do cliente para excluir: ");
-        int id = lerOpcao();
-        if (clienteRepository.removerPorId(id)) {
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        if (clienteRepository.removerPorId(id)) { // CORRIGIDO: Passa o ID
             System.out.println("Cliente removido com sucesso!");
         } else {
             System.out.println("Falha ao remover. Cliente com ID " + id + " não encontrado ou possui pedidos associados.");
         }
     }
 
-    // -------------------------------------------------------------------------
     // --- MÉTODOS CRUD DE FUNCIONÁRIO (Usando JDBC) ---
-    // -------------------------------------------------------------------------
     
     private static void cadastrarFuncionario() {
         System.out.println("\n--- Cadastro de Funcionário ---");
@@ -324,8 +313,8 @@ public class Main {
 
     private static void buscarFuncionario() {
         System.out.print("Digite o ID do funcionário para buscar: ");
-        int id = lerOpcao();
-        Funcionario f = funcionarioRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Funcionario f = funcionarioRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (f != null) {
             System.out.println("Funcionário encontrado: " + f);
         } else {
@@ -335,22 +324,22 @@ public class Main {
 
     private static void atualizarFuncionario() {
         System.out.print("Digite o ID do funcionário para atualizar: ");
-        int id = lerOpcao();
-        Funcionario funcionarioExistente = funcionarioRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Funcionario funcionarioExistente = funcionarioRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (funcionarioExistente == null) {
             System.out.println("Funcionário com ID " + id + " não encontrado.");
             return;
         }
         
-        System.out.print("Digite o novo nome (Atual: " + funcionarioExistente.getNome() + "): ");
+        System.out.print("Digite o novo nome: ");
         String nome = scanner.nextLine();
-        System.out.print("Digite o novo cargo (Atual: " + funcionarioExistente.getCargo() + "): ");
+        System.out.print("Digite o novo cargo: ");
         String cargo = scanner.nextLine();
-        System.out.print("Digite o novo telefone (Atual: " + funcionarioExistente.getTelefone() + "): ");
+        System.out.print("Digite o novo telefone: ");
         String telefone = scanner.nextLine();
         
         Funcionario dadosNovos = new Funcionario(nome, cargo, telefone);
-        if (funcionarioRepository.atualizar(id, dadosNovos)) {
+        if (funcionarioRepository.atualizar(id, dadosNovos)) { // CORRIGIDO: Passa o ID e o objeto
             System.out.println("Funcionário atualizado com sucesso!");
         } else {
             System.out.println("Falha ao atualizar funcionário.");
@@ -359,17 +348,15 @@ public class Main {
 
     private static void excluirFuncionario() {
         System.out.print("Digite o ID do funcionário para excluir: ");
-        int id = lerOpcao();
-        if (funcionarioRepository.removerPorId(id)) {
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        if (funcionarioRepository.removerPorId(id)) { // CORRIGIDO: Passa o ID
             System.out.println("Funcionário removido com sucesso!");
         } else {
             System.out.println("Falha ao remover. Funcionário com ID " + id + " não encontrado ou possui pedidos associados.");
         }
     }
     
-    // -------------------------------------------------------------------------
     // --- MÉTODOS CRUD DE SERVIÇO (Usando JDBC) ---
-    // -------------------------------------------------------------------------
     
     private static void cadastrarServico() {
         System.out.println("\n--- Cadastro de Serviço ---");
@@ -402,8 +389,8 @@ public class Main {
 
     private static void buscarServico() {
         System.out.print("Digite o ID do serviço para buscar: ");
-        int id = lerOpcao();
-        Servico s = servicoRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Servico s = servicoRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (s != null) {
             System.out.println("Serviço encontrado: " + s);
         } else {
@@ -413,22 +400,22 @@ public class Main {
 
     private static void atualizarServico() {
         System.out.print("Digite o ID do serviço para atualizar: ");
-        int id = lerOpcao();
-        Servico servicoExistente = servicoRepository.buscarPorId(id);
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        Servico servicoExistente = servicoRepository.buscarPorId(id); // CORRIGIDO: Passa o ID
         if (servicoExistente == null) {
             System.out.println("Serviço com ID " + id + " não encontrado.");
             return;
         }
         
-        System.out.print("Digite a nova descrição (Atual: " + servicoExistente.getDescricao() + "): ");
+        System.out.print("Digite a nova descrição: ");
         String descricao = scanner.nextLine();
-        System.out.print("Digite o novo Tempo Estimado em minutos (Atual: " + servicoExistente.getTempoEstimado() + "): ");
+        System.out.print("Digite o novo Tempo Estimado em minutos: ");
         int tempo = lerOpcao(); 
         
-        double preco = lerDouble("Novo Preço Base (Atual: " + servicoExistente.getPrecoBase() + "): "); 
+        double preco = lerDouble("Novo Preço Base: "); 
 
         Servico dadosNovos = new Servico(descricao, tempo, preco);
-        if (servicoRepository.atualizar(id, dadosNovos)) {
+        if (servicoRepository.atualizar(id, dadosNovos)) { // CORRIGIDO: Passa o ID e o objeto
             System.out.println("Serviço atualizado com sucesso!");
         } else {
             System.out.println("Falha ao atualizar serviço.");
@@ -437,17 +424,15 @@ public class Main {
 
     private static void excluirServico() {
         System.out.print("Digite o ID do serviço para excluir: ");
-        int id = lerOpcao();
-        if (servicoRepository.removerPorId(id)) {
+        int id = lerOpcao(); // CORRIGIDO: Lê o ID
+        if (servicoRepository.removerPorId(id)) { // CORRIGIDO: Passa o ID
             System.out.println("Serviço removido com sucesso!");
         } else {
             System.out.println("Falha ao remover. Serviço com ID " + id + " não encontrado ou está em uso em algum pedido.");
         }
     }
 
-    // -------------------------------------------------------------------------
     // --- MÉTODOS DE PEDIDO (Usando JDBC) ---
-    // -------------------------------------------------------------------------
     
     private static void cadastrarPedido() {
         System.out.println("\n--- Registro de Novo Pedido ---");
@@ -455,14 +440,14 @@ public class Main {
         System.out.print("ID do Cliente (Necessário): ");
         int idCliente = lerOpcao();
         if (clienteRepository.buscarPorId(idCliente) == null) {
-            System.out.println("ERRO: Cliente com ID " + idCliente + " não encontrado. Cancele ou cadastre o cliente.");
+            System.out.println("ERRO: Cliente com ID " + idCliente + " não encontrado.");
             return;
         }
 
         System.out.print("ID do Funcionário (Necessário): ");
         int idFuncionario = lerOpcao();
         if (funcionarioRepository.buscarPorId(idFuncionario) == null) {
-            System.out.println("ERRO: Funcionário com ID " + idFuncionario + " não encontrado. Cancele ou cadastre o funcionário.");
+            System.out.println("ERRO: Funcionário com ID " + idFuncionario + " não encontrado.");
             return;
         }
         
@@ -488,28 +473,20 @@ public class Main {
             }
         }
     }
-
-    // -------------------------------------------------------------------------
-    // --- NOVOS MÉTODOS DE LÓGICA DE NEGÓCIO ---
-    // -------------------------------------------------------------------------
     
-    /**
-     * Adiciona itens (Serviços) a um pedido existente no banco de dados.
-     * Usa ItemPedidoRepository e ServicoRepository.
-     */
+    // --- MÉTODOS DE LÓGICA DE NEGÓCIO ---
+    
     private static void adicionarItensAoPedido() {
         System.out.println("\n--- Adicionar Itens ao Pedido ---");
         System.out.print("Digite o ID do Pedido que deseja adicionar itens: ");
         int idPedido = lerOpcao();
         
-        // 1. Valida o Pedido
-        Pedido pedido = pedidoRepository.buscarPorId(idPedido);
+        Pedido pedido = pedidoRepository.buscarPorId(idPedido); // CORRIGIDO: Passa o ID
         if (pedido == null) {
             System.out.println("ERRO: Pedido com ID " + idPedido + " não encontrado.");
             return;
         }
 
-        // 2. Loop para adicionar múltiplos itens
         while (true) {
             listarServicos();
             System.out.print("Digite o ID do Serviço (0 para encerrar): ");
@@ -517,14 +494,12 @@ public class Main {
             
             if (idServico == 0) break;
 
-            // 3. Valida o Serviço
-            Servico servico = servicoRepository.buscarPorId(idServico);
+            Servico servico = servicoRepository.buscarPorId(idServico); // CORRIGIDO: Passa o ID
             if (servico == null) {
                 System.out.println("ERRO: Serviço com ID " + idServico + " não encontrado.");
                 continue;
             }
 
-            // 4. Pede a quantidade
             System.out.print("Quantidade para o serviço '" + servico.getDescricao() + "': ");
             int quantidade = lerOpcao();
             if (quantidade <= 0) {
@@ -532,7 +507,6 @@ public class Main {
                 continue;
             }
 
-            // 5. Cálculo e Criação
             double valorUnitario = servico.getPrecoBase();
             double subtotal = valorUnitario * quantidade;
 
@@ -544,7 +518,6 @@ public class Main {
                 subtotal
             );
 
-            // 6. Persistência
             if (itemPedidoRepository.adicionar(item) != null) {
                 System.out.printf("✅ Item Adicionado: %d x %s (Subtotal: R$%.2f)\n", quantidade, servico.getDescricao(), subtotal);
             } else {
@@ -554,30 +527,20 @@ public class Main {
         System.out.println("Itens do pedido finalizados. Retornando ao menu de pedidos.");
     }
     
-    /**
-     * Finaliza o pedido registrando o pagamento.
-     * Requer a soma dos subtotais (ItemPedido) para determinar o Valor Total.
-     */
     private static void finalizarPedidoPagamento() {
         System.out.println("\n--- Finalizar Pedido e Registrar Pagamento ---");
         System.out.print("Digite o ID do Pedido para finalizar: ");
         int idPedido = lerOpcao();
         
-        // 1. Valida o Pedido
-        Pedido pedido = pedidoRepository.buscarPorId(idPedido);
+        Pedido pedido = pedidoRepository.buscarPorId(idPedido); // CORRIGIDO: Passa o ID
         if (pedido == null) {
             System.out.println("ERRO: Pedido com ID " + idPedido + " não encontrado.");
             return;
         }
         
-        // 2. Cálculo do Valor Total (Lógica de Negócio Necessária: Deveria buscar itens e somar!)
-        // Como o ItemPedidoRepository não tem um 'listarPorPedidoId' simples, 
-        // vamos simular o valor total pedindo ao usuário.
-        // *Em um projeto real, você precisaria de um método no ItemPedidoRepository para calcular este valor.*
         System.out.println("ATENÇÃO: Este sistema precisa calcular o total (soma dos itens).");
         double valorTotal = lerDouble("Digite o Valor Total a ser cobrado: ");
         
-        // 3. Coleta dados do Pagamento
         System.out.print("Forma de Pagamento (Ex: Cartão, Pix, Dinheiro): ");
         String formaPagamento = scanner.nextLine();
         
@@ -586,7 +549,6 @@ public class Main {
         System.out.print("Status do Pagamento (Ex: Pago, Pendente): ");
         String statusPagamento = scanner.nextLine();
         
-        // 4. Criação e Persistência do Pagamento
         Pagamento pagamento = new Pagamento(
             idPedido, 
             formaPagamento, 
@@ -598,10 +560,9 @@ public class Main {
         if (pagamentoRepository.adicionar(pagamento) != null) {
             System.out.println("✅ Pagamento registrado com sucesso! ID: " + pagamento.getId());
             
-            // 5. Atualizar Status do Pedido (Opcional, mas recomendado)
             if (statusPagamento.equalsIgnoreCase("Pago") && !pedido.getStatus().equalsIgnoreCase("Pronto para Entrega")) {
                 pedido.setStatus("Pronto para Entrega");
-                pedidoRepository.atualizar(idPedido, pedido);
+                pedidoRepository.atualizar(idPedido, pedido); // CORRIGIDO: Passa o ID e o objeto
                 System.out.println("Status do Pedido atualizado para: Pronto para Entrega.");
             }
         } else {

@@ -1,23 +1,32 @@
-// src/model/ItemPedido.java
 package model;
 
-import java.math.BigDecimal;
+// REMOVIDO: import java.math.BigDecimal;
 
 public class ItemPedido {
     private int id_item;
     private int id_pedido;
     private int id_servico;
     private int quantidade;
-    private BigDecimal valor_unitario;
-    private BigDecimal subtotal;
+    private double valor_unitario; // Sincronizado (double é compatível com decimal do SQL)
+    private double subtotal;       // Sincronizado (double é compatível com decimal do SQL)
 
-    public ItemPedido(int id_pedido, int id_servico, int quantidade, BigDecimal valor_unitario) {
+    // 1. Construtor para NOVO Item (INSERT - SEM ID)
+    public ItemPedido(int id_pedido, int id_servico, int quantidade, double valor_unitario, double subtotal) {
         this.id_pedido = id_pedido;
         this.id_servico = id_servico;
         this.quantidade = quantidade;
         this.valor_unitario = valor_unitario;
-        // Calcula o subtotal ao criar (o banco também pode fazer isso)
-        this.subtotal = valor_unitario.multiply(new BigDecimal(quantidade));
+        this.subtotal = subtotal; 
+    }
+    
+    // 2. Construtor para LER DO BANCO (SELECT - COM ID)
+    public ItemPedido(int id_item, int id_pedido, int id_servico, int quantidade, double valor_unitario, double subtotal) {
+        this.id_item = id_item;
+        this.id_pedido = id_pedido;
+        this.id_servico = id_servico;
+        this.quantidade = quantidade;
+        this.valor_unitario = valor_unitario;
+        this.subtotal = subtotal;
     }
 
     // Getters e Setters
@@ -29,10 +38,10 @@ public class ItemPedido {
     public void setIdServico(int id_servico) { this.id_servico = id_servico; }
     public int getQuantidade() { return quantidade; }
     public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
-    public BigDecimal getValorUnitario() { return valor_unitario; }
-    public void setValorUnitario(BigDecimal valor_unitario) { this.valor_unitario = valor_unitario; }
-    public BigDecimal getSubtotal() { return subtotal; }
-    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    public double getValorUnitario() { return valor_unitario; }
+    public void setValorUnitario(double valor_unitario) { this.valor_unitario = valor_unitario; }
+    public double getSubtotal() { return subtotal; }
+    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
 
     @Override
     public String toString() {

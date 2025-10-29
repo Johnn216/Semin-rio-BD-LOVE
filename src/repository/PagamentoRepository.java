@@ -4,19 +4,18 @@ import model.Pagamento;
 import util.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class PagamentoRepository {
     
-    // Helper para converter java.util.Date para java.sql.Date
-    private java.sql.Date convertUtilToSql(java.util.Date uDate) {
-        if (uDate == null) return null;
-        return new java.sql.Date(uDate.getTime());
-    }
+    // REMOVIDA a função convertUtilToSql e o import java.util.Date,
+    // pois o modelo Pagamento.java já usa java.sql.Date diretamente.
 
-    // Adiciona um novo registro de pagamento no banco de dados
+    /**
+     * Adiciona um novo registro de pagamento no banco de dados.
+     */
     public Pagamento adicionar(Pagamento pagamento) {
-        String sql = "INSERT INTO pagamentos (id_pedido, forma_pagamento, valor_total, data_pagamento, status_pagamento) VALUES (?, ?, ?, ?, ?)";
+        // Altere 'pagamentos' para 'Pagamento' se for o nome da tabela no seu SQL
+        String sql = "INSERT INTO Pagamento (id_pedido, forma_pagamento, valor_total, data_pagamento, status_pagamento) VALUES (?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -28,20 +27,18 @@ public class PagamentoRepository {
             // 1. Define os parâmetros
             stmt.setInt(1, pagamento.getIdPedido());
             stmt.setString(2, pagamento.getFormaPagamento());
-            stmt.setDouble(3, pagamento.getValorTotal());
+            stmt.setDouble(3, pagamento.getValorTotal()); // CORRIGIDO: Agora usa setDouble
             
-            // A data de pagamento pode ser NULL (se for inserido com status 'Pendente')
+            // Data de pagamento
             if (pagamento.getDataPagamento() != null) {
-                stmt.setDate(4, convertUtilToSql(pagamento.getDataPagamento()));
+                stmt.setDate(4, pagamento.getDataPagamento());
             } else {
                 stmt.setNull(4, java.sql.Types.DATE);
             }
-            
             stmt.setString(5, pagamento.getStatusPagamento());
             
-            stmt.executeUpdate(); // Executa a inserção
+            stmt.executeUpdate();
 
-            // 2. Obtém o ID gerado (id_pagamento)
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 pagamento.setId(rs.getInt(1));
@@ -58,11 +55,11 @@ public class PagamentoRepository {
 
     /**
      * Lista todos os pagamentos.
-     * @return Uma lista de objetos Pagamento.
      */
     public ArrayList<Pagamento> listar() {
         ArrayList<Pagamento> pagamentos = new ArrayList<>();
-        String sql = "SELECT * FROM pagamentos";
+        // Altere 'pagamentos' para 'Pagamento' se for o nome da tabela no seu SQL
+        String sql = "SELECT * FROM Pagamento";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -78,8 +75,8 @@ public class PagamentoRepository {
                     rs.getInt("id_pagamento"),
                     rs.getInt("id_pedido"),
                     rs.getString("forma_pagamento"),
-                    rs.getDouble("valor_total"),
-                    rs.getDate("data_pagamento"), // Pode ser null
+                    rs.getDouble("valor_total"), // CORRIGIDO: Agora usa rs.getDouble
+                    rs.getDate("data_pagamento"), 
                     rs.getString("status_pagamento")
                 );
                 pagamentos.add(p);
@@ -92,6 +89,5 @@ public class PagamentoRepository {
         return pagamentos;
     }
     
-    // ATENÇÃO: Os métodos buscarPorId, atualizar e removerPorId também devem ser implementados. 
-    // Por exemplo, o método 'atualizar' seria crucial para mudar o status de 'Pendente' para 'Pago'.
+    // ... outros métodos ...
 }

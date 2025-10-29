@@ -1,23 +1,33 @@
-// src/model/Pagamento.java
 package model;
 
-import java.math.BigDecimal;
-import java.sql.Date;
+import java.sql.Date; // IMPORTANTE: Usar java.sql.Date
 
 public class Pagamento {
     private int id_pagamento;
     private int id_pedido;
     private String forma_pagamento;
-    private BigDecimal valor_total;
+    private double valor_total; // CORRIGIDO: Agora é double
     private Date data_pagamento;
     private String status_pagamento;
 
-    public Pagamento(int id_pedido, String forma_pagamento, BigDecimal valor_total, Date data_pagamento) {
+    // 1. Construtor para NOVO Pagamento (INSERT - SEM ID)
+    // CORRIGIDO: Recebe 5 argumentos e o valor é 'double'
+    public Pagamento(int id_pedido, String forma_pagamento, double valor_total, Date data_pagamento, String status_pagamento) {
         this.id_pedido = id_pedido;
         this.forma_pagamento = forma_pagamento;
         this.valor_total = valor_total;
         this.data_pagamento = data_pagamento;
-        this.status_pagamento = "Pendente"; 
+        this.status_pagamento = status_pagamento; 
+    }
+
+    // 2. Construtor para LER DO BANCO (SELECT - COM ID)
+    public Pagamento(int id_pagamento, int id_pedido, String forma_pagamento, double valor_total, Date data_pagamento, String status_pagamento) {
+        this.id_pagamento = id_pagamento;
+        this.id_pedido = id_pedido;
+        this.forma_pagamento = forma_pagamento;
+        this.valor_total = valor_total;
+        this.data_pagamento = data_pagamento;
+        this.status_pagamento = status_pagamento;
     }
 
     // Getters e Setters
@@ -27,8 +37,10 @@ public class Pagamento {
     public void setIdPedido(int id_pedido) { this.id_pedido = id_pedido; }
     public String getFormaPagamento() { return forma_pagamento; }
     public void setFormaPagamento(String forma_pagamento) { this.forma_pagamento = forma_pagamento; }
-    public BigDecimal getValorTotal() { return valor_total; }
-    public void setValorTotal(BigDecimal valor_total) { this.valor_total = valor_total; }
+    
+    public double getValorTotal() { return valor_total; } // Retorna double
+    public void setValorTotal(double valor_total) { this.valor_total = valor_total; }
+    
     public Date getDataPagamento() { return data_pagamento; }
     public void setDataPagamento(Date data_pagamento) { this.data_pagamento = data_pagamento; }
     public String getStatusPagamento() { return status_pagamento; }
